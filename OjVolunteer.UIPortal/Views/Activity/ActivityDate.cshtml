@@ -189,9 +189,9 @@
                     var length = (data["data"]).length;
                     $("#lilist").empty();
                     if (document.getElementsByClassName("green greenbox")[0]) {
-                    document.getElementsByClassName("green greenbox")[0].setAttribute("class", "lightgrey")
+                        document.getElementsByClassName("green greenbox")[0].setAttribute("class", "lightgrey")
                     }
-                    a.setAttribute("class","green greenbox")
+                    a.setAttribute("class", "green greenbox")
                     for (var i = 0; i < length; i++) {
                         var temp = data["data"][i];
                         console.log(temp.ActivityIcon)
@@ -229,14 +229,22 @@
                             li_a2_div.append(li_a2_div_div);
                             li_a2_div.append(li_a2_div_p);
                             li_a2.append(li_a2_div);
-                             li.append(li_a2);
+                            li.append(li_a2);
                         }
                         li.append(li_a1);
-                       
+
 
                         $("#lilist").append(li);
                     }
                 }
+                else {
+                    $("#lilist").empty();
+                    if (document.getElementsByClassName("green greenbox")[0]) {
+                        document.getElementsByClassName("green greenbox")[0].setAttribute("class", "lightgrey")
+                        
+                    }
+                    a.setAttribute("class", "green greenbox")
+                }//没有活动;
                 });
               }
 
