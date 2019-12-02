@@ -1,0 +1,41 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>开始使用layui</title>
+    <link rel="stylesheet" href="~/Content/layui/css/layui.css">
+</head>
+<body>
+    <script type="text/javascript" src="http://192.168.43.40:8083/assets/player.js"></script>
+    <script type="text/javascript">
+    p2ps_embed("auto", "live", "http://192.168.43.40:8083/videos/live/49/56/OpFZf8p297uy6", "p2ps_video", "640", "480", "10.1.0", "http://192.168.43.40:8083/assets/expressInstall.swf", {}, { allowFullScreen: true, allowScriptAccess: "always" });
+    </script><div id="p2ps_video">
+        <h1>我们需要Flash player 10.1 或以上版本来播放。</h1><p><a href="http://www.adobe.com/go/getflashplayer"><img src="http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif" alt="安装最新的Flash player" /></a></p>
+    </div>
+
+    <script>
+        //注意：导航 依赖 element 模块，否则无法进行功能性操作
+        layui.use('element', function () {
+            var element = layui.element;
+
+            //…
+        });
+    </script>
+    <script src="~/Content/layui/layui.js"></script>
+    <script>
+        //一般直接写在一个js文件中
+        layui.use(['layer', 'form'], function () {
+            var layer = layui.layer
+                , form = layui.form;
+
+            layer.msg('Hello World');
+        });
+    </script>
+</body>
+</html>

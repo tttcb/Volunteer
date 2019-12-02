@@ -1,0 +1,38 @@
+﻿@model OjVolunteer.Model.Activity
+@using OjVolunteer.Model;
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=UYUVTmdALwNR5AmGA9GoRyAdsjsf42ki"></script>
+    <script type="text/javascript" src="~/Scripts/Map/Heatmap_min.js"></script>
+    <script type="text/javascript" src="~/Scripts/Map/HeatMap.js"></script>
+    <title></title>
+</head>
+<body>
+    <div class="acmore-title" style="width:1680px;height:700px;border:#ccc solid 1px;" id="mapContent">
+
+    </div>
+
+</body>
+</html>
+
+<script type="text/javascript">
+    //标注点数组
+    @{ var list = ViewBag.ActivityAddressList as List<Activity>; }
+    var markerArr = [];
+    @foreach (var data in list)
+     {
+
+        if (data.ActivityAddressX != null && data.ActivityAddressY != null)
+        {
+        <text>
+    markerArr.push({ lng:@data.ActivityAddressX, lat:@data.ActivityAddressY, count: @data.ActivityPrediNum});
+        </text>
+            }
+        }
+    BaiduMapObj.init("mapContent", 120.704179, 28.002872, markerArr, 12);//创建和初始化地图
+    
+</script>
+

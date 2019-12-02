@@ -1,0 +1,138 @@
+﻿@model OjVolunteer.Model.UserInfo
+@{
+    Layout = "~/Views/Shared/User_Layout.cshtml";
+}
+
+<style>
+    img {
+        width: 100%;
+    }
+</style>
+<header>
+    <nav class="top">
+        <p>电子义工证</p>
+    </nav>
+</header>
+
+<div style="margin-top:50px ;width:100vw">
+
+
+    <dl class="dl-horizontal" style="text-align: center;">
+        <dt>
+            <hr />
+            <h4 style="text-align: center; padding-bottom:10px">你好，@Model.UserInfoShowName ，你的服务总时长为 @ViewBag.Total 小时</h4>
+           
+            <h4 id="showresult"></h4>
+            <hr />
+            <input type="button" id="btnapply" value="申请电子义工证" onclick="checktime()"></input>
+            <hr />
+            <img src="@Model.UserInfoIDcard">
+
+            <!--<h3 id="show">
+         小时
+    </h3> @Html.DisplayNameFor(model => model.UserInfoShowName)-->
+
+
+
+        </dt>
+    </dl>
+</div>
+<div id="text"></div>
+<div style="text-align: center;" id="qrcode"></div>
+<div id="demo_div" style="width: 100vw "></div>
+<!--<div><img src="~/Content/oj/images/yg01.jpg" class="watermark" pagespeed_url_hash="3591179686"  onload="pagespeed.CriticalImages.checkImageForCriticality(this);"/></div>
+    -->
+<p>
+</p>
+@section Script{
+    <script src="~/Content/qrcode/qrcode.js"></script>
+
+    <script src="~/Scripts/App/watermark.js"></script>
+    <script>
+        function checktime() {
+            $.post("/UserInfo/CheckIDcard", { ownerid: @Model.UserInfoID }, function (data) {
+                if (data["msg"] == "success") {
+                    layer.msg("申请成功");
+                    document.getElementById("showresult").innerHTML = "正在申请中";
+                    document.getElementById("btnapply").setAttribute("style", "color:grey");
+                    document.getElementById("btnapply").setAttribute("disabled", "disabled");
+                } else {
+                    layer.msg("申请失败 请稍后重试");
+                }
+            });
+                
+        }
+        
+
+        function showresult() {
+            if (@ViewBag.Total< 50) {
+                document.getElementById("showresult").innerHTML = "暂时无法申请电子义工证";
+                document.getElementById("btnapply").setAttribute("value", "还需" + (50 - @ViewBag.Total ) + "小时即可申请");
+                document.getElementById("btnapply").setAttribute("style", "color:grey");
+                document.getElementById("btnapply").setAttribute("disabled", "disabled");
+            } else {
+                stu = @ViewBag.CardStatus +0;
+                if ("@Model.UserInfoIDcard" == "" && stu == 0) {
+                    document.getElementById("showresult").innerHTML = "可申请电子义工证";
+                } else if ("@Model.UserInfoIDcard" != "" && stu == 0) {
+                    document.getElementById("showresult").innerHTML = "目前无可申请电子义工证";
+                    document.getElementById("btnapply").setAttribute("style", "color:grey");
+                    document.getElementById("btnapply").setAttribute("disabled", "disabled");
+                } else if ( stu == 1) {
+                    document.getElementById("showresult").innerHTML = "正在申请中";
+                    document.getElementById("btnapply").setAttribute("style", "color:grey");
+                    document.getElementById("btnapply").setAttribute("disabled", "disabled");
+                }
+                
+                
+                
+            }
+        }
+        showresult();
+    </script>
+
+
+
+    <script>
+        var domain = "http://" + window.location.host;
+        var url = "/UserInfo/Other/?id="+@Model.UserInfoID;
+        URL = domain + url;
+        //new QRCode(document.getElementById("qrcode"), url);
+        function wm(username){
+            if (@ViewBag.Total< 50) {
+                alert("暂无图片");
+            } else {
+
+               // some = (watermark.text.center(username, '200px bold', '#000', 1), watermark.image.upperRight(0.5));
+                watermark(['/Content/oj/images/yg1.jpg'])
+                    .image(watermark.text.center(username, '30px bold', '#000', 1))
+                    .then(function (img) {
+                        document.getElementById('text').appendChild(img);
+
+                    });
+
+            }
+
+        }
+        // document.getElementById("qrcode").lastChild.src
+
+       // wm("@Model.UserInfoShowName");
+
+
+
+
+    /*    watermark(['/Content/oj/images/ID.jpg'])
+            .image(watermark.text.center('MyPhoto', '55px bold', '#000', 1))
+            .then(function (img) {
+                document.getElementById('text').appendChild(img);
+            });
+            var load = false;
+                        window.onload = function () {
+                            if (!load) {
+                                wmark.init({ "position": "top-left", "opacity": 70, "className": "watermark", "path": "http://www.patrick-wied.at/static/watermarkjs/demos/img/qr.png" });
+                                load = true;
+                            }
+                        }
+    */
+    </script>
+}

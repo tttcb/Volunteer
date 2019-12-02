@@ -1,0 +1,106 @@
+﻿@model OjVolunteer.Model.Activity
+@using OjVolunteer.Model;
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" href="~/Content/layui/css/layui.css">
+    <script type="text/javascript" src="~/Scripts/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=UYUVTmdALwNR5AmGA9GoRyAdsjsf42ki"></script>
+    <script type="text/javascript" src="~/Scripts/Map/MarkerMap.v2.js"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/library/Heatmap/2.0/src/Heatmap_min.js"></script>
+    <title></title>
+</head>
+<body>
+
+    <ul class="layui-nav" lay-filter="">
+        <div style="float:left">
+            <li class="layui-nav-item layui-nav-itemed"><input name="社会服务" onclick="BaiduMapObj.show(this)" type="checkbox" value="1" id="check1" checked="checked" /><label for="check1">社会服务&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label></li>
+            <li class="layui-nav-item layui-nav-itemed"><input name="校园服务" onclick="BaiduMapObj.show(this)" type="checkbox" value="3" id="check2" checked="checked" /><label for="check2">校园服务&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label></li>
+        </div>
+        <li class="layui-nav-item layui-nav-itemed" id="sum"></li>
+        <li class="layui-nav-item layui-nav-itemed">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</li>
+        <li class="layui-nav-item layui-nav-itemed" id="times">目前志愿者活动总时长为:@ViewBag.TotalTime</li>
+        <li class="layui-nav-item layui-nav-itemed">小时</li>
+        <div style="float:right">
+            <li class="layui-nav-item layui-nav-itemed"><input name="进行中的活动" onclick="BaiduMapObj.show(this)" type="checkbox" value="4" id="check4" checked="checked" /><label for="check4">进行中的活动&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label></li>
+
+        </div>
+    </ul>
+
+    @*<script>
+            //注意：导航 依赖 element 模块，否则无法进行功能性操作
+            layui.use('element', function () {
+                var element = layui.element;
+            });
+        </script>*@
+    <div class="layui-container" style="width:1680px;height:700px;border:#ccc solid 1px;" id="mapContent">
+
+    </div>
+
+</body>
+</html>
+
+<script type="text/javascript">
+    //标注点数组
+    @{ var list = ViewBag.ActivityAddressList as List<Activity>; }
+
+    var markerArr = [];
+    var times = 0;
+    var sum = 0;
+    @{
+        for(int i=0;i<list.Count;i++)
+        {
+            TimeSpan timeSpan = (TimeSpan)(list[i].ActivityEnd - list[i].ActivityStart);
+            decimal Time = (decimal)(timeSpan.Hours + (double)timeSpan.Minutes / 60);
+            int iTime = Convert.ToInt32(Time);
+            list[i].ActivityClicks = iTime * list[i].ActivityPrediNum ;
+            list[i].ActivityManagerID = 1;
+        }
+    }
+    @{
+        var query = from t in list
+                    group t by t.ActivityAddressX + t.ActivityAddressY into g
+                    select g.Take(1).Select(c => new Activity()
+                    {
+                        ActivityAddressX = c.ActivityAddressX,
+                        ActivityAddressY = c.ActivityAddressY,
+                        ActivityName = c.ActivityName,
+                        ActivityIcon = c.ActivityIcon,
+                        ActivityAddress = c.ActivityAddress,
+                        ActivityAddressDetail = c.ActivityAddressDetail,
+                        ActivityID = c.ActivityID,
+                        ActivityTypeID = c.ActivityTypeID,
+                        Status=c.Status,
+                        ActivityPrediNum = list.Where(d => d.ActivityAddressX == c.ActivityAddressX && d.ActivityAddressY == c.ActivityAddressY).Select(ee => (ee.ActivityPrediNum)).Sum(),
+                        ActivityClicks = list.Where(d => d.ActivityAddressX == c.ActivityAddressX && d.ActivityAddressY == c.ActivityAddressY).Select(ee => (ee.ActivityClicks)).Sum(),
+                        ActivityManagerID = list.Where(d => d.ActivityAddressX == c.ActivityAddressX && d.ActivityAddressY == c.ActivityAddressY).Select(ee => (ee.ActivityManagerID)).Count()
+
+                    });
+        List<Activity> reval = new List<Activity>();
+        foreach (var r in query)
+        {
+            reval.Add(r.First());
+        }    }
+    @foreach (var data in reval)
+    {
+
+        if (data.ActivityAddressX != null && data.ActivityAddressY != null)
+        {
+            //TimeSpan timeSpan = (TimeSpan)(data.ActivityEnd - data.ActivityStart);
+            //decimal Time = (decimal)(timeSpan.Hours + (double)timeSpan.Minutes / 60);
+            //Time=Math.Round(Time, 2);
+        <text>
+    sum += @data.ActivityManagerID;
+            markerArr.push({ p0:@data.ActivityAddressX, p1:@data.ActivityAddressY, ActName: "@data.ActivityName",ActImg:"@data.ActivityIcon.Replace("\\", "\\\\")", ActAddressDetail:"@data.ActivityAddress@data.ActivityAddressDetail",ActUrl:"@data.ActivityID",ActType:@data.ActivityTypeID,ActTime:@data.ActivityClicks,ActNum:@data.ActivityPrediNum,ActStatus:@data.Status});
+        </text>
+        }
+    }
+    $("#sum").html("目前志愿者活动总数为:" + sum);
+
+    BaiduMapObj.init("mapContent", 120.704179, 28.002872, markerArr, 13);//创建和初始化地图
+
+
+</script>
+

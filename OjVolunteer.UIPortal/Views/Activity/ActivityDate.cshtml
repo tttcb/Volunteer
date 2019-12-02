@@ -1,0 +1,331 @@
+﻿
+@{
+    ViewBag.Title = "ActivityDate";
+}
+<h2>ActivityDate</h2>
+@{
+    Layout = "~/Views/Shared/User_Layout.cshtml";
+}
+<header>
+
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="viewport " content="width=device-width,initial-scale=1">
+    <link href="~/Content/oj/css/bootstrap.css" rel="stylesheet" />
+    <link href="~/Content/layui/css/layui.css" rel="stylesheet" />
+    <link href="~/Content/oj/css/main.css" rel="stylesheet" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="~/Content/oj/js/jquery-1.12.4.js"></script>
+    <style type="text/css">
+
+
+        * {
+            padding: 0%;
+            margin: 0%;
+        }
+
+        html, body {
+            background: #f2f2f2;
+        }
+
+        .calendar {
+            margin: 45px;
+            width: 450px;
+            height: 350px;
+            background: white;
+            box-shadow: 0px 1px 1px rgba(0,0,0,.1);
+        }
+
+        .title {
+            height: 70px;
+            border-bottom: 1px solid rgba(0,0,0,.1);
+            position: relative;
+            text-align: center;
+        }
+
+        #calendar-title {
+            font-size: 25px;
+            text-transform: uppercase;
+            font-family: Arial, Helvetica, sans-serif;
+            padding: 14px 0 0 0;
+        }
+
+        #calendar-year {
+            font-size: 15px;
+            font-family: Arial, Helvetica, sans-serif;
+            font-weight: normal;
+        }
+
+        #pre {
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            background: url(../../Content/Upload/Images/zuo.jpg) no-repeat 50% 50%;
+            /*没规定大小时，图片显示 0X0*/
+            width: 60px;
+            height: 70px;
+        }
+
+        #next {
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            background: url(../../Content/Upload/Images/you.jpg) no-repeat 50% 50%;
+            width: 60px;
+            height: 70px;
+        }
+
+        .body-list ul {
+            font-size: 14px;
+            font-family: Arial, Helvetica, sans-serif;
+            font-weight: bold;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+            .body-list ul li {
+                list-style: none;
+                /*
+                display:inline-block;
+                width: 13.3%;
+                */
+                /*100/7 = 14.28%*/
+                display: block;
+                width: 14.28%;
+                float: left;
+                /*规定行高，垂直居中*/
+                height: 36px;
+                line-height: 36px;
+                box-sizing: border-box;
+                text-align: center;
+            }
+
+
+        .green {
+            color: #6ac13c;
+        }
+
+        .lightgrey { /*浅灰色显示过去的日期*/
+            color: #a8a8a8;
+        }
+
+        .darkgrey { /*深灰色显示将来的日期*/
+            color: #565656;
+        }
+
+        /*日期当天用绿色背景绿色文字加以显示*/
+        .greenbox {
+            border: 1px solid #6ac13c;
+            background: #e9f8df;
+        }
+    </style>
+</header>
+<body>
+    <header>
+        <nav class="top">
+            <p>活动日历</p>
+        </nav>
+
+    </header>
+    <div width=100%>
+
+
+
+        <div class="calendar">
+            <div class="title">
+                <h1 class="green" id="calendar-title">Month</h1>
+                <h2 class="green" id="calendar-year">Year</h2>
+                <a href="" id="pre"></a>
+                <a href="" id="next"></a>
+            </div>
+
+            <div class="body">
+                <div class="lightgrey body-list">
+                    <ul>
+                        <li>SUN</li>
+                        <li>MON</li>
+                        <li>TUE</li>
+                        <li>WED</li>
+                        <li>THU</li>
+                        <li>FRI</li>
+                        <li>SAT</li>
+
+                    </ul>
+
+                </div>
+
+                <div class="darkgrey body-list">
+                    <ul id="days">
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+         var month_olypic = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];//闰年每个月份的天数
+        var month_normal = [31,28,31,30,31,30,31,31,30,31,30,31];
+        var month_name =["January","Febrary","March","April","May","June","July","Auguest","September","October","November","December"];
+        //获取以上各个部分的id
+        var holder = document.getElementById("days");
+        var prev = document.getElementById("prev");
+        var next = document.getElementById("next");
+        var ctitle = document.getElementById("calendar-title");
+        var cyear = document.getElementById("calendar-year");
+        //获取当天的年月日
+        var my_date = new Date();
+        var my_year = my_date.getFullYear();//获取年份
+        var my_month = my_date.getMonth(); //获取月份，一月份的下标为0
+        var my_day = my_date.getDate();//获取当前日期
+
+
+
+        //获得选中日期的活动
+           
+                function getActivity(year, month, day,a) {
+                    var activitydate = new Date(year, month, day,0,0,0);
+            $.post("/Activity/GetListData1", { date: activitydate.toLocaleDateString() + " " + activitydate.toLocaleTimeString() },function (data) {
+                if (data["msg"] == "success") {
+                    var length = (data["data"]).length;
+                    $("#lilist").empty();
+                    if (document.getElementsByClassName("green greenbox")[0]) {
+                    document.getElementsByClassName("green greenbox")[0].setAttribute("class", "lightgrey")
+                    }
+                    a.setAttribute("class","green greenbox")
+                    for (var i = 0; i < length; i++) {
+                        var temp = data["data"][i];
+                        console.log(temp.ActivityIcon)
+                        //图片
+                        var li = $("<li class='hot-list clearfix'></li>");
+                        var li_a1 = $("<a  href='/Activity/Details/?Id=" + temp.ActivityID + "'></a>");
+                        var li_a1_div = $("<div class='hot-inline pull-left'></div>");
+                        var li_a1_div_div = $("<div class='hot-img'></div>");
+
+                        var li_a1_div_div_img = $("<img/>");
+                        li_a1_div_div_img.attr("src", temp.ActivityIcon);
+                        li_a1_div_div.append(li_a1_div_div_img);
+                        if (temp.ActivityName.length > 20) {
+                            temp.ActivityName = temp.ActivityName.substring(0, 20) + "...";
+                        }
+                        var li_a1_div_p = $("<p>" + temp.ActivityName + "</p>");
+                        li_a1_div.append(li_a1_div_div);
+                        li_a1_div.append(li_a1_div_p);
+                        li_a1.append(li_a1_div);
+
+                        i++;
+                        if (i < length) {
+                            temp = data["data"][i];
+                            var li_a2 = $("<a  href='/Activity/Details/?Id=" + temp.ActivityID + "'></a>");
+                            var li_a2_div = $("<div class='hot-inline pull-right'></div>");
+                            var li_a2_div_div = $("<div class='hot-img'></div>");
+
+                            var li_a2_div_div_img = $("<img/>");
+                            li_a2_div_div_img.attr("src", temp.ActivityIcon);
+                            li_a2_div_div.append(li_a2_div_div_img);
+                            if (temp.ActivityName.length > 20) {
+                                temp.ActivityName = temp.ActivityName.substring(0, 20) + "...";
+                            }
+                            var li_a2_div_p = $("<p>" + temp.ActivityName + "</p>");
+                            li_a2_div.append(li_a2_div_div);
+                            li_a2_div.append(li_a2_div_p);
+                            li_a2.append(li_a2_div);
+                             li.append(li_a2);
+                        }
+                        li.append(li_a1);
+                       
+
+                        $("#lilist").append(li);
+                    }
+                }
+                });
+              }
+
+        //根据年月获取当月第一天是周几
+        function dayStart(month,year){
+            var tmpDate = new Date(year, month, 1);
+            return (tmpDate.getDay());
+        }
+        //根据年份判断某月有多少天(11,2018),表示2018年12月
+        function daysMonth(month, year){
+            var tmp1 = year % 4;
+            var tmp2 = year % 100;
+            var tmp3 = year % 400;
+
+            if((tmp1 == 0 && tmp2 != 0) || (tmp3 == 0)){
+                return (month_olypic[month]);//闰年
+            }else{
+                return (month_normal[month]);//非闰年
+            }
+        }
+        //js实现str插入li+class,不要忘了用innerhtml进行插入
+        function refreshDate(){
+            var str = "";
+            //计算当月的天数和每月第一天都是周几，day_month和day_year都从上面获得
+            var totalDay = daysMonth(my_month,my_year);
+            var firstDay = dayStart(my_month, my_year);
+            //添加每个月的空白部分
+            for(var i = 0; i < firstDay; i++){
+                str += "<li>"+"</li>";
+            }
+
+            //从一号开始添加知道totalDay，并为pre，next和当天添加样式
+            var myclass;
+            for(var i = 1; i <= totalDay; i++){
+                //三种情况年份小，年分相等月份小，年月相等，天数小
+                //点击pre和next之后，my_month和my_year会发生变化，将其与现在的直接获取的再进行比较
+                //i与my_day进行比较,pre和next变化时，my_day是不变的
+                console.log(my_year+" "+my_month+" "+my_day);
+                console.log(my_date.getFullYear()+" "+my_date.getMonth()+" "+my_date.getDay());
+                if((my_year < my_date.getFullYear())||(my_year == my_date.getFullYear() && my_month < my_date.getMonth()) || (my_year == my_date.getFullYear() && my_month == my_date.getMonth() && i < my_day)){
+                    myclass = " class='lightgrey'";
+                }else if(my_year == my_date.getFullYear() && my_month == my_date.getMonth() && i == my_day){
+                    myclass = "class = 'green greenbox'";
+                }else{
+                    myclass = "class = 'darkgrey'";
+                }
+                str += "<li "+ myclass +" onclick='getActivity(" + my_year + "," + my_month + "," + i + ",this);'>"+ i + "</li>";
+            }
+            holder.innerHTML = str;
+            ctitle.innerHTML = month_name[my_month];
+            cyear.innerHTML = my_year;
+           
+            }
+            
+               
+         
+        //调用refreshDate()函数，日历才会出现
+            refreshDate();
+            //if (document.getElementsByClassName("green greenbox")[0])
+           
+                getActivity(my_date.getFullYear(), my_date.getMonth(), my_date.getDay()+1, document.getElementsByClassName("green greenbox")[0]);
+         
+        //实现onclick向前或向后移动
+        pre.onclick = function(e){
+            e.preventDefault();
+            my_month--;
+            if(my_month < 0){
+                my_year--;
+                my_month = 11; //即12月份
+            }
+            refreshDate();
+        }
+
+        next.onclick = function(e){
+            e.preventDefault();
+            my_month++;
+            if(my_month > 11){
+                my_month = 0;
+                my_year++;
+            }
+            refreshDate();
+            }
+            
+        </script>
+
+    </div>
+    <div class="hot-action" id="abc" >
+        <ul class="hot-content" id="lilist"></ul>
+    </div>
+
+</body>
+
