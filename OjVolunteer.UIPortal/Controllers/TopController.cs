@@ -83,6 +83,7 @@ namespace OjVolunteer.UIPortal.Controllers
             int OrgId = int.Parse(Request["OrgId"] ?? "-1");
             DateTime Start = DateTime.Parse(Request["Start"] ?? DateTime.Parse(DateTime.Now.ToString("yyyy - MM - dd")).AddMonths(-1).ToShortDateString());
             DateTime End = DateTime.Parse(Request["End"] ?? DateTime.Now.ToShortDateString());
+            End=End.AddDays(1);//往后计算1天
             var PageData = ActivityDetailService.GetTopCache(OrgId, Start, End, pageSize, pageIndex, out int total);
             if (PageData.Count() > 0)
             {
@@ -100,7 +101,7 @@ namespace OjVolunteer.UIPortal.Controllers
             int OrgId = int.Parse(Request["OrgId"] ?? "-1");
             DateTime Start = DateTime.Parse(Request["Start"] ?? DateTime.Parse(DateTime.Now.ToString("yyyy - MM - dd")).AddMonths(-1).ToShortDateString());
             DateTime End = DateTime.Parse(Request["End"] ?? DateTime.Now.ToShortDateString());
-
+            End=End.AddDays(1);//往后计算1天
             int Rank = ActivityDetailService.GetRankCache(LoginUser.UserInfoID, OrgId, Start,End, out decimal time);
             return Json(new { Rank, Num = time }, JsonRequestBehavior.AllowGet);
            

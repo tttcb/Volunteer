@@ -64,13 +64,13 @@ namespace OjVolunteer.BLL
             #endregion
 
             List<ActTopView> list = Common.Cache.CacheHelper.GetCache("ActTop") as List<ActTopView>;
-            if (list == null)
+            if (list != null)
             {
                 list = CurrentDal.GetEntities(u => u.Status == delNormal && u.UserInfoId == u.UserInfo.UserInfoID)
                     .Select(n => new ActTopView { UserInfoID = n.UserInfoId, ActivityTime = n.ActivityDetailTime,
                                                 OrgId = n.UserInfo.OrganizeInfoID,CreateTime = (DateTime)n.CreateTime})
                    .ToList() ;
-                Common.Cache.CacheHelper.SetCache("ActTop", list, DateTime.Now.AddDays(1));
+                Common.Cache.CacheHelper.SetCache("ActTop", list, DateTime.Now.AddHours(1));
             }
 
             //组织
