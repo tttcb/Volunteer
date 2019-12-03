@@ -21,6 +21,7 @@ namespace OjVolunteer.UIPortal.Controllers
         short delNormal = (short)DelFlagEnum.Normal;
         short delAuditing = (short)Model.Enum.DelFlagEnum.Auditing;
         short delDeleted = (short)Model.Enum.DelFlagEnum.Deleted;
+        short delIDcardStatusNormal = 1;
         public IUserInfoService UserInfoService { get; set; }
         public IOrganizeInfoService OrganizeInfoService { get; set; }
         public IUserDurationService UserDurationService { get; set; }
@@ -40,7 +41,7 @@ namespace OjVolunteer.UIPortal.Controllers
                 UserBadge userBadge = UserBadgeService.GetEntities(u => u.UserInfoID == LoginUser.UserInfoID && u.BadgeID == 1).FirstOrDefault();
                 if (userBadge != null && LoginUser.UserInfoLastTime < userBadge.CreateTime)
                 {
-                    ViewBag.isShow =1 ;
+                    ViewBag.isShow = 1;
                 }
                 LoginUser.UserInfoLastTime = DateTime.Now;
                 UserInfoService.Update(LoginUser);
@@ -612,15 +613,18 @@ namespace OjVolunteer.UIPortal.Controllers
 
         public ActionResult IDCard()
         {
+
             var duration = UserDurationService.GetEntities(u => u.UserDurationID == LoginUser.UserInfoID).FirstOrDefault();
             ViewBag.Total = duration.UserDurationTotal;
             ViewBag.Proparty = duration.UserDurationPropartyTotal;
             ViewBag.Party = duration.UserDurationPartyTotal;
             ViewBag.Normal = duration.UserDurationNormalTotal;
+            
             try
             {
                 var idcard = UserIDcardService.GetEntities(u => u.IDcardOwnerId == LoginUser.UserInfoID).FirstOrDefault();
                 ViewBag.CardStatus = idcard.IDcardStatus;
+                
             }catch{
                 ViewBag.CardStatus = 0;
             }
@@ -646,28 +650,51 @@ namespace OjVolunteer.UIPortal.Controllers
             }
             ownerid = int.Parse(Request["ownerid"]);
 
-            UserIDcard userIDcard = new UserIDcard()
+            
+            UserInfo userinfoo = UserInfoService.GetEntities(u => LoginUser.UserInfoID == u.UserInfoID).FirstOrDefault();
+            
+            if (userinfoo.UserInfoIDcard == null) //判断是否拥有义工证
             {
-                IDcardId = LoginUser.UserInfoID,
-                IDcardOwnerId = LoginUser.UserInfoID,
-                IDcardStatus = 1,
-                IDcardApplyTime = DateTime.Now,
-            };
-            try
-            {
-                if (UserIDcardService.AddCard(userIDcard))
+                //获取当前IDcard表中IDcard总数并计算下一张编号（197001010001）
+                int IDcardSum = UserIDcardService.GetEntities(u => u.IDcardStatus == delIDcardStatusNormal).Count() + 1;
+                if (IDcardSum < 10)
+                    userinfoo.UserInfoIDcard = Convert.ToString(DateTime.Now.ToString("yyyy-MM-dd").Replace("-", "")) + "000" + IDcardSum.ToString();
+                else if (IDcardSum < 100)
+                    userinfoo.UserInfoIDcard = Convert.ToString(DateTime.Now.ToLongDateString().Replace("/", "")) + "00" + IDcardSum.ToString();
+                else if (IDcardSum < 1000)
+                    userinfoo.UserInfoIDcard = Convert.ToString(DateTime.Now.ToLongDateString().Replace("/", "")) + "0" + IDcardSum.ToString();
+
+                UserInfoService.Update(userinfoo);
+
+
+                UserIDcard userIDcard = new UserIDcard()
                 {
-                    return Json(new { msg = "success" }, JsonRequestBehavior.AllowGet);
-                }
-                return Json(new { msg = "fail" }, JsonRequestBehavior.AllowGet);
-            }
-            catch
-            {
+                    IDcardId = IDcardSum,
+                    IDcardOwnerId = LoginUser.UserInfoID,
+                    IDcardStatus = 1,
+                    IDcardApplyTime = DateTime.Now,
+                };
+                try
+                {
+                    if (UserIDcardService.AddCard(userIDcard))
+                    {
+                        return Json(new { msg = "success" }, JsonRequestBehavior.AllowGet);
+                    }
                     return Json(new { msg = "fail" }, JsonRequestBehavior.AllowGet);
+                }
+                catch
+                {
+                    return Json(new { msg = "fail" }, JsonRequestBehavior.AllowGet);
+                }
+            }
+            else
+            {
+                return Json(new { msg = "have" }, JsonRequestBehavior.AllowGet);
             }
             
         }
-        /*[HttpPost]
+
+        [HttpPost]
         [ActionAuthentication(AbleOrganize = false, AbleUser = true)]
         public ActionResult IDCard(int hour)
         {
@@ -685,7 +712,7 @@ namespace OjVolunteer.UIPortal.Controllers
        //     return Json(new { msg }, JsonRequestBehavior.AllowGet);
             return View(LoginUser);
         }
-        */
+        
         #endregion
 
         #region 服务指南
