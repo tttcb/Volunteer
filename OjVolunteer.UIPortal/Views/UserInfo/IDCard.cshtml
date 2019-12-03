@@ -27,8 +27,7 @@
 
             } else {
                 //满足50小时的情况
-                
-                console.log("123");
+
                 $.post("/UserInfo/CheckIDcard", { ownerid: @Model.UserInfoID }, function (data) {
                     if (data["msg"] == "success") {
                         layer.msg("申请成功");
@@ -62,11 +61,11 @@
                 //var img_data1 = Canvas2Image.saveAsPNG(oCanvas, true).getAttribute('src');
                 //saveFile(img_data1, 'vtrp.png');
             }
-               
 
 
 
-            
+
+
 
         }
 
@@ -132,23 +131,33 @@
     </div>
 
     @* 电子义工证图片内容*@
-    <div style="position:relative;width:500px" id="vtrp">
-        <div style="position:relative;z-index:0;width:500px"><img src="~/img/bgimg.png"></div>
-        <p style="position:absolute;top:120px;left:180px;font-size:50px">@Model.UserInfoShowName</p>
-        <div style="position:absolute;top:124px;left:49px;width:75px"><img src="@Model.UserInfoIcon"></div>
-        <div id="qrcode" style="position:absolute;top:15px;left:420px;width:60px"></div>
-        <p style="position:absolute;top:200px;left:200px;font-size:20px">@Model.UserInfoIDcard</p>
+    @*<div class="layui-row">
+        <div style="position:relative;width:400px" id="vtrp">
+            <div style="position:relative;z-index:0;width:400px"><img src="~/img/bgimg.png"></div>
+            <p style="position:absolute;top:100px;margin-left:150px;font-size:40px">@Model.UserInfoShowName</p>
+            <div style="position:absolute;top:99px;margin-left:40px;width:60px"><img src="@Model.UserInfoIcon"></div>
+            <div id="qrcode" style="position:absolute;top:10px;margin-left:335px;width:60px"></div>
+            <p style="position:absolute;top:155px;margin-left:160px;font-size:22px">@Model.UserInfoIDcard</p>
+        </div>
+    </div>*@
+    <div class="layui-row">
+        <div style="position:relative;width:100%" id="vtrp">
+            <div style="position:relative;z-index:0;width:100%"><img src="~/img/bgimg.png"></div>
+            <p style="position:absolute;top:37.5%;margin-left:37.5%;font-size:10vw">@Model.UserInfoShowName</p>
+            <div style="position:absolute;top:37%;margin-left:10%;width:15%"><img src="@Model.UserInfoIcon"></div>
+            <div id="qrcode" style="position:absolute;top:10px;margin-left:83.75%;width:15%"></div>
+            <p style="position:absolute;top:59%;margin-left:40%;font-size:5vw">@Model.UserInfoIDcard</p>
+        </div>
     </div>
-
-
 
     <input type="button" id="btnapply" value="申请电子义工证" onclick="checktime()">
 
     <script>
-        var domain = "http://" + window.location.host;
+        var domain = "http://50hours.top";
         var url = "/UserInfo/Other/?id="+@Model.UserInfoID;
         var URL = domain + url;
         new QRCode(document.getElementById("qrcode"), URL);  // 设置要生成二维码的链接
+
     </script>
 
     @*new QRCode(document.getElementById("qrcode"), url);*@
